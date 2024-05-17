@@ -2,7 +2,6 @@ import { connectToDB } from '@/db/database';
 import { dataSorter } from '@/middlewares/dataSorter';
 import errorHandler from '@/middlewares/errorHandler';
 import Task from '@/models/Task';
-import { NextApiRequest, NextApiResponse } from 'next';
 import { NextResponse } from 'next/server';
 
 export async function GET() {

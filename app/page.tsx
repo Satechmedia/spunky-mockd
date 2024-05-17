@@ -13,6 +13,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useConvertNumberLocale } from '@/utils/hooks/useConvertNumberLocale';
 import { useLinkOpener } from '@/utils/hooks/useLinkOpener';
+import useUserStore from '@/store';
 
 type Props = {};
 
@@ -32,16 +33,29 @@ const Home = (props: Props) => {
   });
 
   const sessionUser = session?.user as SessionUser;
-  const referrals = sessionUser ? sessionUser.referrals : [];
-  const referralCode = sessionUser ? sessionUser.referralCode : '';
-  const referralLink = useGenerateLink(referralCode);
-  const totalEarnings = sessionUser
-    ? Number(sessionUser.referralEarnings ?? 0) +
-      Number(sessionUser.pointsEarned ?? 0)
-    : 0;
 
   const [tasks, setTasks] = useState<Task[]>([]);
   const [taskLoading, setTaskLoading] = useState<boolean>(false);
+  const [claimLoading, setClaimLoading] = useState<boolean>(false);
+
+  const storeUser = useUserStore((state) => state.setUser);
+  const user = useUserStore((state) => state.user);
+
+  const getUser = async () => {
+    if (sessionUser) {
+      await axios
+        .post('api/getUserById', {
+          userID: sessionUser._id,
+        })
+        .then((res) => {
+          storeUser(res.data.data);
+        })
+        .catch((err) => {
+          console.log(err);
+          redirect('/login');
+        });
+    }
+  };
 
   const getAllTasks = async () => {
     setTaskLoading(true);
@@ -58,8 +72,55 @@ const Home = (props: Props) => {
   };
 
   useEffect(() => {
+    getUser();
     getAllTasks();
-  }, []);
+  }, [sessionUser]);
+
+  const referrals = user ? user.referrals : [];
+  const referralCode = user ? user.referralCode : '';
+  const referralLink = useGenerateLink(referralCode);
+  const totalEarnings = user
+    ? Number(user.referralEarnings ?? 0) + Number(user.pointsEarned ?? 0)
+    : 0;
+
+  const userCompletedTasks = user ? user.completedTasks : [];
+
+  const completeTask = async (taskID: string, link: string) => {
+    // Do task
+    await useLinkOpener(link);
+
+    const data = {
+      userID: user._id,
+      taskID,
+    };
+    await axios
+      .patch('api/updateUserTask', data)
+      .then((res) => {
+        console.log(res.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+  const claimPoints = async (taskID: string) => {
+    setClaimLoading(true);
+    const data = {
+      userID: user._id,
+      taskID,
+    };
+    await axios
+      .post('api/tasks/claimPoints', data)
+      .then((res) => {
+        setClaimLoading(false);
+        console.log(res.data);
+        getUser();
+      })
+      .catch((err) => {
+        setClaimLoading(false);
+        console.log(err);
+      });
+  };
 
   return (
     <div className="w-full px-5 pt-4">
@@ -176,27 +237,58 @@ const Home = (props: Props) => {
               </p>
             </div>
           )}
-          {tasks.length > 0 &&
+          {!taskLoading &&
+            tasks.length > 0 &&
             tasks.map((task) => {
               const { _id, description, rewardPoint, link } = task;
+
+              const userTask = userCompletedTasks.find((item) => {
+                return item._id === _id;
+              });
 
               return (
                 <div
                   key={_id}
                   className="bg-white dark:bg-tertiaryDark flex items-center justify-between px-4 lg:px-6 py-3 rounded-lg"
                 >
-                  <p className="font-medium dark:text-white text-primary">
-                    {description}
-                  </p>
-                  <button
-                    type="button"
-                    className="px-6 py-2 text-xs border-2 border-secondary text-white rounded-full bg-primary"
-                    onClick={() => {
-                      useLinkOpener(link);
-                    }}
-                  >
-                    {useConvertNumberLocale(rewardPoint)} points
-                  </button>
+                  <div className="w-3/5">
+                    <p className="font-medium dark:text-white text-primary">
+                      {description}
+                    </p>
+                  </div>
+
+                  {userTask && userTask.claimed && (
+                    <button
+                      type="button"
+                      className="px-6 py-2 text-xs border-2 border-secondary text-white rounded-full bg-secondary"
+                      disabled
+                    >
+                      Claimed
+                    </button>
+                  )}
+
+                  {userTask && userTask.claimed === false && (
+                    <button
+                      type="button"
+                      className="px-6 py-2 text-xs border-2 border-secondary text-white rounded-full bg-primary"
+                      onClick={() => {
+                        claimPoints(task._id);
+                      }}
+                    >
+                      {claimLoading ? 'Claiming...' : 'Claim'}
+                    </button>
+                  )}
+                  {!userTask && (
+                    <button
+                      type="button"
+                      className="px-6 py-2 text-xs border-2 border-secondary text-white rounded-full bg-primary"
+                      onClick={() => {
+                        completeTask(task._id, link);
+                      }}
+                    >
+                      {useConvertNumberLocale(rewardPoint)} points
+                    </button>
+                  )}
                 </div>
               );
             })}

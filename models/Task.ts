@@ -5,6 +5,7 @@ export interface TaskDocument extends Document {
   description: string;
   rewardPoint: number;
   link: string;
+  claimed?: boolean;
 }
 
 interface TaskModel extends Model<TaskDocument> {}
@@ -22,6 +23,9 @@ const taskSchema = new Schema<TaskDocument, TaskModel>(
     link: {
       type: String,
       required: true,
+    },
+    claimed: {
+      type: Boolean,
     },
   },
   { timestamps: true },

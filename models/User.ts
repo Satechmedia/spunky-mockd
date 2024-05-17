@@ -1,5 +1,12 @@
-import mongoose, { Document, Schema, model, models } from 'mongoose';
+import mongoose, { Document, Mongoose, Schema, model, models } from 'mongoose';
 import { Model } from 'mongoose';
+
+export interface Task {
+  description: string;
+  rewardPoint: number;
+  link: string;
+  claimed: boolean;
+}
 
 export interface UserDocument extends Document {
   username: string;
@@ -12,6 +19,7 @@ export interface UserDocument extends Document {
   pointsEarned?: number;
   createdAt: Date;
   updatedAt: Date;
+  completedTasks: Task[];
 }
 
 interface UserModel extends Model<UserDocument> {}
@@ -52,6 +60,26 @@ const userSchema = new Schema<UserDocument, UserModel>(
     pointsEarned: {
       type: Number,
     },
+    completedTasks: [
+      {
+        description: {
+          type: String,
+          required: true,
+        },
+        rewardPoint: {
+          type: Number,
+          required: true,
+        },
+        link: {
+          type: String,
+          required: true,
+        },
+        claimed: {
+          type: Boolean,
+          required: true,
+        },
+      },
+    ],
   },
   { timestamps: true },
 );
