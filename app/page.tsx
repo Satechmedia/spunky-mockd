@@ -243,9 +243,11 @@ const Home = (props: Props) => {
             tasks.map((task) => {
               const { _id, description, rewardPoint, link } = task;
 
-              const userTask = userCompletedTasks.find((item) => {
-                return item._id === _id;
-              });
+              const userTask = userCompletedTasks
+                ? userCompletedTasks.find((item) => {
+                    return item._id === _id;
+                  })
+                : null;
 
               return (
                 <div
