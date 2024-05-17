@@ -11,6 +11,7 @@ type Props<T extends FieldValues> = {
   secured?: boolean;
   passwordToggle?: () => void;
   required?: boolean;
+  defaultValue?: any;
 };
 
 const CustomInput = <T extends FieldValues>({
@@ -23,6 +24,7 @@ const CustomInput = <T extends FieldValues>({
   passwordToggle,
   secured,
   required = true,
+  defaultValue,
 }: Props<T>) => {
   return (
     <div className="w-full">
@@ -33,6 +35,7 @@ const CustomInput = <T extends FieldValues>({
           className="w-full h-12 px-4 py-3 mb-2 bg-input rounded-[10px] shadow-md placeholder:text-placeholder dark:text-black"
           placeholder={placeholder}
           {...register(name as any, { required: required })}
+          defaultValue={defaultValue}
         />
 
         {secured && (
