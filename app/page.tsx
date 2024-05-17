@@ -135,7 +135,7 @@ const Home = (props: Props) => {
         <div className="space-y-4">
           <div className="bg-tertiary rounded-lg flex items-center space-x-3 p-2">
             <UserPlusIcon className="size-5 text-primary" />
-            <p>Referrals: {referrals.length}</p>
+            <p>Referrals: {referrals ? referrals.length : 0}</p>
           </div>
         </div>
 
