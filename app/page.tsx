@@ -57,17 +57,19 @@ const Home = (props: Props) => {
   };
 
   const getAllTasks = async () => {
-    setTaskLoading(true);
-    await axios
-      .get('api/tasks')
-      .then((res) => {
-        setTaskLoading(false);
-        setTasks(res.data.data);
-      })
-      .catch((err) => {
-        setTaskLoading(false);
-        console.log(err);
-      });
+    if (sessionUser) {
+      setTaskLoading(true);
+      await axios
+        .get('api/tasks')
+        .then((res) => {
+          setTaskLoading(false);
+          setTasks(res.data.data);
+        })
+        .catch((err) => {
+          setTaskLoading(false);
+          console.log(err);
+        });
+    }
   };
 
   useEffect(() => {
