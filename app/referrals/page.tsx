@@ -8,9 +8,7 @@ const Referrals = (props: Props) => {
     <div className="w-full px-5 pt-4">
       <div className="bg-tertiary dark:bg-secondaryDark px-4 py-3 rounded-lg shadow-lg">
         <p className="dark:text-white text-primary">
-          Welcome to Epoch 4, everyone! Below you'll see your earnings for this
-          epoch. To view your total number of points, simply navigate to the
-          Rewards tab on the left.
+          Welcome to SpunkySDX, everyone! Below you'll see your earnings. To view your Referral & Level, simply navigate to the Referral tab on the left.
         </p>
       </div>
 
